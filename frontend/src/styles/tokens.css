@@ -1,0 +1,67 @@
+/* Design tokens — paleta navy/grafite/cinza (sem verde) */
+:root {
+  /* Navy */
+  --color-navy-50: #e8eef6;
+  --color-navy-100: #c5d4e8;
+  --color-navy-200: #9fb8d8;
+  --color-navy-300: #789bc7;
+  --color-navy-400: #5a85bb;
+  --color-navy-500: #3c6faf;
+  --color-navy-600: #2d5a9a;
+  --color-navy-700: #1e3a5f; /* primary brand */
+  --color-navy-800: #152d4a;
+  --color-navy-900: #0c1f35;
+
+  /* Grafite */
+  --color-grafite-50: #f5f5f5;
+  --color-grafite-100: #e0e0e0;
+  --color-grafite-200: #bdbdbd;
+  --color-grafite-300: #9e9e9e;
+  --color-grafite-400: #757575;
+  --color-grafite-500: #616161;
+  --color-grafite-600: #424242; /* texto principal */
+  --color-grafite-700: #303030;
+  --color-grafite-800: #212121;
+  --color-grafite-900: #121212;
+
+  /* Cinza */
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f5f5f5; /* background padrão */
+  --color-gray-200: #eeeeee;
+  --color-gray-300: #e0e0e0; /* bordas */
+  --color-gray-400: #bdbdbd;
+  --color-gray-500: #9e9e9e; /* texto secundário */
+  --color-gray-600: #757575;
+  --color-gray-700: #616161;
+  --color-gray-800: #424242;
+  --color-gray-900: #212121;
+
+  /* Semânticos */
+  --color-brand: var(--color-navy-700);
+  --color-brand-hover: var(--color-navy-800);
+  --color-text-primary: var(--color-grafite-600);
+  --color-text-secondary: var(--color-gray-500);
+  --color-bg-default: var(--color-gray-100);
+  --color-bg-surface: #ffffff;
+  --color-border: var(--color-gray-300);
+
+  /* Tipografia */
+  --font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Espaçamento base 4px */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+
+  /* Alvos de toque mínimo (acessibilidade) */
+  --touch-target-min: 44px;
+
+  /* Border radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-full: 9999px;
+}

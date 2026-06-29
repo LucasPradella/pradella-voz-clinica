@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash .specify/scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks)",
+      "Bash(go version *)",
+      "Bash(xargs ls -la)",
+      "Bash(GOTOOLCHAIN=local go mod tidy)",
+      "Bash(GOTOOLCHAIN=local go list -m -json github.com/anthropics/anthropic-sdk-go)",
+      "Bash(GOPROXY=direct GOTOOLCHAIN=local go list -m -versions github.com/anthropics/anthropic-sdk-go)",
+      "Bash(GOPROXY=direct GONOSUMCHECK=* go list -m -versions github.com/anthropics/anthropic-sdk-go@latest)",
+      "Bash(GOPROXY=https://proxy.golang.org,direct GOTOOLCHAIN=local go get github.com/anthropics/anthropic-sdk-go@latest)",
+      "Bash(curl -s \"https://proxy.golang.org/github.com/anthropics/anthropic-sdk-go/@v/list\")",
+      "Bash(curl *)",
+      "Bash(GOTOOLCHAIN=local go build *)",
+      "Bash(GOTOOLCHAIN=local GOFLAGS=\"-mod=mod\" go get ./...)",
+      "Bash(GOTOOLCHAIN=local GOFLAGS=\"-mod=mod\" go get *)",
+      "Bash(GOTOOLCHAIN=local GOFLAGS=\"-mod=mod\" go build *)",
+      "Bash(GOTOOLCHAIN=local GONOSUMCHECK=* GOFLAGS=\"-mod=mod\" go get *)",
+      "Bash(unzip -l /tmp/pgvector.zip)",
+      "Bash(unzip -l /tmp/pgvector3.zip)",
+      "Bash(unzip *)",
+      "Bash(GOTOOLCHAIN=local go test *)",
+      "Bash(GOTOOLCHAIN=local go get *)"
+    ]
+  }
+}

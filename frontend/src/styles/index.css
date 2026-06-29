@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import './tokens.css';
+
+@layer base {
+  html {
+    font-family: var(--font-family-base);
+    background-color: var(--color-bg-default);
+    color: var(--color-text-primary);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Ensure touch targets meet minimum 44px accessibility requirement */
+  button,
+  a,
+  [role='button'] {
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+  }
+
+  /* Focus visible ring for keyboard navigation */
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-navy-700 text-white font-semibold rounded-lg px-6 py-3
+           hover:bg-navy-800 active:bg-navy-900
+           transition-colors duration-150
+           disabled:opacity-50 disabled:cursor-not-allowed
+           focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2;
+    min-height: var(--touch-target-min);
+  }
+
+  .btn-secondary {
+    @apply border border-gray-300 text-grafite-600 font-semibold rounded-lg px-6 py-3
+           hover:bg-gray-100 active:bg-gray-200
+           transition-colors duration-150
+           disabled:opacity-50 disabled:cursor-not-allowed;
+    min-height: var(--touch-target-min);
+  }
+
+  .card {
+    @apply bg-white rounded-lg border border-gray-300 p-4 shadow-sm;
+  }
+
+  .input {
+    @apply w-full border border-gray-300 rounded-lg px-4 py-3
+           text-grafite-600 placeholder-gray-500
+           focus:outline-none focus:border-navy-500 focus:ring-1 focus:ring-navy-500
+           disabled:bg-gray-100 disabled:cursor-not-allowed;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-grafite-600 mb-1;
+  }
+
+  .error-text {
+    @apply text-sm text-red-600 mt-1;
+  }
+}
