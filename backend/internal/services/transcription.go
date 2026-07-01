@@ -8,41 +8,30 @@ import (
 	openai "github.com/sashabaranov/go-openai"
 )
 
-const (
-	// WhisperModel is OpenAI's Whisper model for speech-to-text.
-	WhisperModel = "whisper-1"
+const groqBaseURL = "https://api.groq.com/openai/v1"
 
-	// AudioLanguage instructs Whisper to transcribe in Brazilian Portuguese.
-	AudioLanguage = "pt"
-
-	// MaxAudioDurationSeconds is the hard limit enforced before sending to Whisper.
-	MaxAudioDurationSeconds = 120
-)
-
-// TranscriptionService wraps the OpenAI Whisper API for audio-to-text conversion.
+// TranscriptionService transcribes audio using Groq Whisper (free tier).
 type TranscriptionService struct {
 	client *openai.Client
 }
 
-func NewTranscriptionService(apiKey string) *TranscriptionService {
-	return &TranscriptionService{
-		client: openai.NewClient(apiKey),
-	}
+func NewTranscriptionService(apiKey string) (*TranscriptionService, error) {
+	cfg := openai.DefaultConfig(apiKey)
+	cfg.BaseURL = groqBaseURL
+	return &TranscriptionService{client: openai.NewClientWithConfig(cfg)}, nil
 }
 
-// TranscribeAudio sends the audio stream to Whisper and returns the Portuguese transcription.
-// The audio is processed in memory and never persisted (FR-017b).
+// TranscribeAudio sends the audio to Groq Whisper and returns the Portuguese transcription.
 func (s *TranscriptionService) TranscribeAudio(ctx context.Context, audio io.Reader, filename string) (string, error) {
 	resp, err := s.client.CreateTranscription(ctx, openai.AudioRequest{
-		Model:    WhisperModel,
+		Model:    "whisper-large-v3-turbo",
 		Reader:   audio,
 		FilePath: filename,
-		Language: AudioLanguage,
+		Language: "pt",
 		Format:   openai.AudioResponseFormatText,
 	})
 	if err != nil {
-		return "", fmt.Errorf("whisper transcription: %w", err)
+		return "", fmt.Errorf("groq whisper transcription: %w", err)
 	}
-
 	return resp.Text, nil
 }

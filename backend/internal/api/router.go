@@ -67,9 +67,10 @@ func New(deps *Deps) http.Handler {
 			quotaSvc:  deps.QuotaSvc,
 		}
 		r.Post("/api/evolutions", evoHandler.Create)
-		r.Patch("/api/evolutions/{id}", evoHandler.Patch)
 		r.Get("/api/evolutions", evoHandler.List)
 		r.Get("/api/evolutions/{id}", evoHandler.Get)
+		r.Patch("/api/evolutions/{id}", evoHandler.Patch)
+		r.Delete("/api/evolutions/{id}", evoHandler.Delete)
 
 		subHandler := &SubscriptionHandler{
 			evoStore:   deps.EvoStore,

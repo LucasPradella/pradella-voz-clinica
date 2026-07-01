@@ -142,6 +142,7 @@ async function request<T>(
     )
   }
 
+  if (res.status === 204) return undefined as T
   return res.json() as Promise<T>
 }
 
@@ -176,6 +177,10 @@ export async function createEvolution(audioBlob: Blob, label?: string): Promise<
     method: 'POST',
     body: form,
   })
+}
+
+export async function deleteEvolution(id: string): Promise<void> {
+  await request<void>(`/evolutions/${id}`, { method: 'DELETE' })
 }
 
 export async function patchEvolution(

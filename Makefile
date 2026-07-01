@@ -12,13 +12,13 @@ setup-backend:
 	cd backend && go mod download && go mod tidy
 
 migrate:
-	cd backend && goose -dir migrations postgres "$(DATABASE_URL)" up
+	cd backend && set -a && . ./.env && set +a && $(HOME)/go/bin/goose -dir migrations postgres "$$DATABASE_URL" up
 
 ingest:
-	cd backend && go run ./cmd/ingest
+	cd backend && set -a && . ./.env && set +a && go run ./cmd/ingest
 
 backend:
-	cd backend && go run ./cmd/api
+	cd backend && set -a && . ./.env && set +a && go run ./cmd/api
 
 # -- Frontend --
 setup-frontend:

@@ -209,6 +209,21 @@ func (s *EvolutionStore) List(ctx context.Context, userID string, page, limit in
 	return items, total, rows.Err()
 }
 
+// Delete removes an evolution owned by userID. Returns ErrNotFound if not found.
+func (s *EvolutionStore) Delete(ctx context.Context, id, userID string) error {
+	tag, err := s.db.Exec(ctx,
+		`DELETE FROM evolutions WHERE id = $1 AND user_id = $2`,
+		id, userID,
+	)
+	if err != nil {
+		return fmt.Errorf("delete evolution: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
 // GetSubscription returns the active subscription for a user.
 func (s *EvolutionStore) GetSubscription(ctx context.Context, userID string) (*models.Subscription, error) {
 	var sub models.Subscription

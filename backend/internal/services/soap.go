@@ -21,10 +21,10 @@ type ProcessResult struct {
 	SourceRefs    []models.SourceRef
 }
 
-// SOAPService orchestrates: Whisper transcription → RAG retrieval → Claude SOAP generation.
+// SOAPService orchestrates: Whisper transcription → RAG retrieval → LLM SOAP generation.
 type SOAPService struct {
 	transcription *TranscriptionService
-	claude        *ClaudeSOAPClient
+	llm           SOAPGenerator
 	ragStore      *rag.Store
 	embedFn       func(ctx context.Context, text string) ([]float32, error)
 }
@@ -32,13 +32,13 @@ type SOAPService struct {
 // NewSOAPService wires the full pipeline.
 func NewSOAPService(
 	transcription *TranscriptionService,
-	claude *ClaudeSOAPClient,
+	llm SOAPGenerator,
 	ragStore *rag.Store,
 	openaiClient *openai.Client,
 ) *SOAPService {
 	return &SOAPService{
 		transcription: transcription,
-		claude:        claude,
+		llm:           llm,
 		ragStore:      ragStore,
 		embedFn: func(ctx context.Context, text string) ([]float32, error) {
 			return embedText(ctx, openaiClient, text)
@@ -49,17 +49,24 @@ func NewSOAPService(
 // Process runs the full pipeline: audio → transcription → RAG → SOAP.
 // The audio is never persisted; it is read and discarded after this call.
 func (s *SOAPService) Process(ctx context.Context, audio io.Reader, filename string) (*ProcessResult, error) {
+	slog.Info("pipeline: starting transcription", "filename", filename)
 	transcript, err := s.transcription.TranscribeAudio(ctx, audio, filename)
 	if err != nil {
+		slog.Error("pipeline: transcription failed", "err", err, "filename", filename)
 		return nil, fmt.Errorf("transcribe: %w", err)
 	}
+	slog.Info("pipeline: transcription ok", "chars", len(transcript))
 
 	ragContext, sourceRefs := s.retrieveRAG(ctx, transcript)
+	slog.Info("pipeline: RAG retrieved", "sources", len(sourceRefs))
 
-	soapOut, err := s.claude.GenerateSOAP(ctx, transcript, ragContext)
+	slog.Info("pipeline: generating SOAP")
+	soapOut, err := s.llm.GenerateSOAP(ctx, transcript, ragContext)
 	if err != nil {
+		slog.Error("pipeline: SOAP generation failed", "err", err)
 		return nil, fmt.Errorf("soap generation: %w", err)
 	}
+	slog.Info("pipeline: SOAP ok")
 
 	// Overwrite source_refs with the actual RAG sources used (authoritative).
 	soapOut.SourceRefs = sourceRefs

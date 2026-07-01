@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Recorder } from '../components/Recorder'
 import { SoapResult } from '../components/SoapResult'
@@ -75,9 +76,19 @@ export default function Home() {
     <main className="min-h-screen bg-gray-100 px-4 py-8">
       <div className="max-w-xl mx-auto space-y-6">
         <header className="text-center">
-          <h1 className="text-2xl font-bold text-navy-700">Pradella Voz Clínica</h1>
+          <div className="flex items-center justify-between mb-1">
+            <h1 className="text-2xl font-bold text-navy-700">Pradella Voz Clínica</h1>
+            {user?.plan === 'pro' && (
+              <Link
+                to="/history"
+                className="text-sm text-navy-700 underline hover:text-navy-600"
+              >
+                Histórico
+              </Link>
+            )}
+          </div>
           {user && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-500">
               {user.email} · {user.plan === 'pro' ? 'Pro' : 'Free'}
               {quota && quota.limit !== null && (
                 <span className="ml-2 text-gray-400">

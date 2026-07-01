@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -75,8 +76,11 @@ func (h *EvolutionHandler) Create(w http.ResponseWriter, r *http.Request) {
 		filename = fmt.Sprintf("recording.webm")
 	}
 
+	slog.Info("processing audio", "filename", filename, "size_bytes", header.Size, "user_id", claims.UserID)
+
 	result, err := h.soapSvc.Process(r.Context(), audioFile, filename)
 	if err != nil {
+		slog.Error("audio processing failed", "err", err, "filename", filename, "user_id", claims.UserID)
 		WriteError(w, http.StatusInternalServerError, "processing_error", "could not process audio")
 		return
 	}
@@ -99,11 +103,24 @@ func (h *EvolutionHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	status := models.EvoStatusDraft
+	cidSuggestions := result.SOAP.CIDSuggestions
+	if cidSuggestions == nil {
+		cidSuggestions = []models.CIDSuggestion{}
+	}
+	confidenceFlags := result.SOAP.ConfidenceFlags
+	if confidenceFlags == nil {
+		confidenceFlags = []models.ConfidenceFlag{}
+	}
+	sourceRefs := result.SourceRefs
+	if sourceRefs == nil {
+		sourceRefs = []models.SourceRef{}
+	}
+
 	resp := models.EvolutionResponse{
 		SOAP:            soap,
-		CIDSuggestions:  result.SOAP.CIDSuggestions,
-		ConfidenceFlags: result.SOAP.ConfidenceFlags,
-		SourceRefs:      result.SourceRefs,
+		CIDSuggestions:  cidSuggestions,
+		ConfidenceFlags: confidenceFlags,
+		SourceRefs:      sourceRefs,
 		Status:          status,
 	}
 
@@ -173,6 +190,32 @@ func (h *EvolutionHandler) Patch(w http.ResponseWriter, r *http.Request) {
 	WriteJSON(w, http.StatusOK, evolutionToResponse(updated))
 }
 
+// Delete handles DELETE /api/evolutions/{id} (Pro only).
+func (h *EvolutionHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	claims, ok := core.ClaimsFromContext(r.Context())
+	if !ok {
+		WriteError(w, http.StatusUnauthorized, "unauthorized", "missing auth")
+		return
+	}
+
+	if models.Plan(claims.Plan) != models.PlanPro {
+		WriteError(w, http.StatusForbidden, "pro_required", "deleting evolutions requires Pro")
+		return
+	}
+
+	id := chi.URLParam(r, "id")
+	if err := h.evoStore.Delete(r.Context(), id, claims.UserID); errors.Is(err, store.ErrNotFound) {
+		WriteError(w, http.StatusNotFound, "not_found", "evolution not found or access denied")
+		return
+	} else if err != nil {
+		WriteError(w, http.StatusInternalServerError, "internal_error", "could not delete evolution")
+		return
+	}
+
+	h.auditSvc.Log(r.Context(), claims.UserID, "evolution.delete", id, nil)
+	w.WriteHeader(http.StatusNoContent)
+}
+
 // List handles GET /api/evolutions — paginated history (Pro only).
 func (h *EvolutionHandler) List(w http.ResponseWriter, r *http.Request) {
 	claims, ok := core.ClaimsFromContext(r.Context())
@@ -239,12 +282,24 @@ func (h *EvolutionHandler) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func evolutionToResponse(evo *models.Evolution) models.EvolutionResponse {
+	cids := evo.CIDSuggestions
+	if cids == nil {
+		cids = []models.CIDSuggestion{}
+	}
+	flags := evo.ConfidenceFlags
+	if flags == nil {
+		flags = []models.ConfidenceFlag{}
+	}
+	refs := evo.SourceRefs
+	if refs == nil {
+		refs = []models.SourceRef{}
+	}
 	return models.EvolutionResponse{
 		ID:              &evo.ID,
 		SOAP:            evo.SOAP,
-		CIDSuggestions:  evo.CIDSuggestions,
-		ConfidenceFlags: evo.ConfidenceFlags,
-		SourceRefs:      evo.SourceRefs,
+		CIDSuggestions:  cids,
+		ConfidenceFlags: flags,
+		SourceRefs:      refs,
 		Status:          evo.Status,
 	}
 }

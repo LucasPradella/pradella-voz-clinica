@@ -35,11 +35,29 @@ func main() {
 	}
 	defer pool.Close()
 
+	transcriptionSvc, err := services.NewTranscriptionService(cfg.GroqKey)
+	if err != nil {
+		slog.Error("init transcription service", "err", err)
+		os.Exit(1)
+	}
+
 	openaiClient := openai.NewClient(cfg.OpenAIKey)
 	ragStore := rag.NewStore(pool)
-	transcriptionSvc := services.NewTranscriptionService(cfg.OpenAIKey)
-	claudeClient := services.NewClaudeSOAPClient(cfg.AnthropicKey)
-	soapSvc := services.NewSOAPService(transcriptionSvc, claudeClient, ragStore, openaiClient)
+
+	var llmClient services.SOAPGenerator
+	switch cfg.LLMProvider {
+	case "gemini":
+		llmClient = services.NewGeminiSOAPClient(cfg.GeminiKey)
+		slog.Info("LLM backend: Gemini", "model", "gemini-2.0-flash")
+	case "groq":
+		llmClient = services.NewGroqSOAPClient(cfg.GroqKey)
+		slog.Info("LLM backend: Groq", "model", "llama-3.3-70b-versatile")
+	default:
+		llmClient = services.NewClaudeSOAPClient(cfg.AnthropicKey)
+		slog.Info("LLM backend: Claude", "model", "claude-sonnet-4-6")
+	}
+
+	soapSvc := services.NewSOAPService(transcriptionSvc, llmClient, ragStore, openaiClient)
 
 	var billingSvc *services.BillingService
 	if cfg.StripeKey != "" {

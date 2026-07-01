@@ -40,6 +40,11 @@ type SOAPOutput struct {
 	SourceRefs      []models.SourceRef      `json:"source_refs"`
 }
 
+// SOAPGenerator is the interface satisfied by any LLM backend that can produce SOAP output.
+type SOAPGenerator interface {
+	GenerateSOAP(ctx context.Context, transcription string, ragContext []string) (*SOAPOutput, error)
+}
+
 // ClaudeSOAPClient wraps the Anthropic SDK for structured SOAP generation.
 type ClaudeSOAPClient struct {
 	client anthropic.Client

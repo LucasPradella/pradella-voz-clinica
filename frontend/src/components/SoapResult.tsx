@@ -8,7 +8,10 @@ interface SoapResultProps {
 }
 
 export function SoapResult({ evolution, onEdit }: SoapResultProps) {
-  const { soap, cid_suggestions, confidence_flags, source_refs, status } = evolution
+  const { soap, status } = evolution
+  const cid_suggestions = evolution.cid_suggestions ?? []
+  const confidence_flags = evolution.confidence_flags ?? []
+  const source_refs = evolution.source_refs ?? []
 
   const fullText = formatSoapText(soap)
 

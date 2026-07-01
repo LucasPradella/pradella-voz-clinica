@@ -20,7 +20,8 @@
       "Bash(unzip -l /tmp/pgvector3.zip)",
       "Bash(unzip *)",
       "Bash(GOTOOLCHAIN=local go test *)",
-      "Bash(GOTOOLCHAIN=local go get *)"
+      "Bash(GOTOOLCHAIN=local go get *)",
+      "Bash(docker exec pradella-db *)"
     ]
   }
 }
